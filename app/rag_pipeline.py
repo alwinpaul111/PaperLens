@@ -9,7 +9,7 @@ Core RAG orchestration:
 from dataclasses import dataclass, field
 from typing import List, Dict
 
-from app.vector_store import similarity_search
+from app.vector_store import similarity_search, get_first_page_chunks
 from app.llm import generate_answer
 from app.config import MAX_HISTORY_TURNS, TOP_K
 
@@ -55,7 +55,10 @@ PROMPT_TEMPLATE = """You are ResearchGPT, an assistant that answers questions st
 the provided research paper excerpts. Follow these rules:
 - Only use information found in the CONTEXT below. If the answer isn't in the context, say so honestly.
 - When you state a fact, refer to it naturally (e.g. "According to the paper...").
-- Be precise and concise. Use bullet points for multi-part answers.
+- Be precise and concise.
+- For multi-part answers, write each point as a short complete sentence on its own line,
+  starting with a plain dash "- " followed immediately by the sentence text (e.g. "- Self-attention connects all positions in constant time.").
+  Never output a bullet marker with no text after it.
 - Do not fabricate citations, numbers, or study results.
 
 {history}
@@ -84,6 +87,9 @@ SUMMARY_TRIGGERS = (
     "summarize the paper",
     "give me a summary",
     "what does this paper discuss",
+    "who are the authors",
+    "who is the author",
+    "who wrote this paper",
 )
 
 
@@ -100,8 +106,16 @@ def answer_question(question: str, memory: ConversationMemory = None, k: int = T
     # For these, always pull in the earliest-page chunks too, since
     # introductions/abstracts are what actually answer this kind of question.
     if _is_broad_summary_question(question):
-        intro_results = similarity_search("introduction background overview objectives", k=k)
         seen_ids = {doc.metadata.get("chunk_id") for doc, _ in results}
+
+        # Page 1 almost always has the title, authors, and abstract/intro —
+        # pull it in directly rather than hoping similarity search finds it.
+        for doc, score in get_first_page_chunks():
+            if doc.metadata.get("chunk_id") not in seen_ids:
+                results.append((doc, score))
+                seen_ids.add(doc.metadata.get("chunk_id"))
+
+        intro_results = similarity_search("introduction background overview objectives authors", k=k)
         for doc, score in intro_results:
             if doc.metadata.get("chunk_id") not in seen_ids:
                 results.append((doc, score))
