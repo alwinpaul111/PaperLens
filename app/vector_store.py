@@ -11,7 +11,7 @@ import os
 from typing import List
 
 from langchain_community.vectorstores import FAISS, Chroma
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 
 from app.config import FAISS_INDEX_PATH, CHROMA_PERSIST_DIR, VECTOR_BACKEND, TOP_K
 from app.embeddings import get_embedding_model
