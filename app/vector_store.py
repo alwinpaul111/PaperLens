@@ -79,7 +79,34 @@ def similarity_search(query: str, k: int = TOP_K):
     return store.similarity_search_with_relevance_scores(query, k=k)
 
 
-def index_exists() -> bool:
+def get_first_page_chunks():
+    """Directly return chunks tagged as page 1 for every indexed document.
+    Bypasses similarity search entirely, since title/author blocks on page 1
+    rarely match well against generic questions like 'who are the authors'.
+    """
+    store = load_index()
+    if store is None:
+        return []
+
+    results = []
+    if VECTOR_BACKEND == "chroma":
+        try:
+            raw = store.get(where={"page_number": 1})
+            for text, meta in zip(raw.get("documents", []), raw.get("metadatas", [])):
+                from langchain_core.documents import Document
+                results.append((Document(page_content=text, metadata=meta), 1.0))
+        except Exception:
+            pass
+        return results
+
+    # FAISS: scan the in-memory docstore directly
+    try:
+        for doc in store.docstore._dict.values():
+            if doc.metadata.get("page_number") == 1:
+                results.append((doc, 1.0))
+    except Exception:
+        pass
+    return results
     if VECTOR_BACKEND == "chroma":
         return os.path.exists(CHROMA_PERSIST_DIR) and bool(os.listdir(CHROMA_PERSIST_DIR))
     return os.path.exists(FAISS_INDEX_PATH)
