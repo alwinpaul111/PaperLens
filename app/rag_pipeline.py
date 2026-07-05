@@ -13,6 +13,8 @@ from app.vector_store import similarity_search, get_first_page_chunks
 from app.llm import generate_answer
 from app.config import MAX_HISTORY_TURNS, TOP_K
 
+MAX_BROAD_QUESTION_CHUNKS = 8
+
 
 @dataclass
 class Citation:
@@ -70,12 +72,15 @@ QUESTION: {question}
 ANSWER:"""
 
 
-def _build_context(results) -> str:
+def _build_context(results, max_chars_per_chunk: int = 900) -> str:
     blocks = []
     for i, (doc, score) in enumerate(results, start=1):
+        text = doc.page_content
+        if len(text) > max_chars_per_chunk:
+            text = text[:max_chars_per_chunk] + "..."
         blocks.append(
             f"[Source {i} | {doc.metadata['doc_name']} | Page {doc.metadata['page_number']}]\n"
-            f"{doc.page_content}"
+            f"{text}"
         )
     return "\n\n".join(blocks)
 
@@ -120,6 +125,11 @@ def answer_question(question: str, memory: ConversationMemory = None, k: int = T
             if doc.metadata.get("chunk_id") not in seen_ids:
                 results.append((doc, score))
                 seen_ids.add(doc.metadata.get("chunk_id"))
+
+        # Cap total chunks sent to the LLM - merging in page-1 + intro search
+        # on top of the original top-k can otherwise blow past the LLM
+        # provider's tokens-per-minute rate limit on a single request.
+        results = results[:MAX_BROAD_QUESTION_CHUNKS]
 
     if not results:
         return RAGResponse(
