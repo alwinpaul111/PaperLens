@@ -27,7 +27,7 @@ FAISS_INDEX_PATH = str(VECTORSTORE_DIR / "faiss_index")
 CHROMA_PERSIST_DIR = str(VECTORSTORE_DIR / "chroma_db")
 
 # ---------- Retrieval ----------
-TOP_K = 4  # number of chunks retrieved per query
+TOP_K = 6  # number of chunks retrieved per query
 
 # ---------- LLM ----------
 # Groq gives a generous free tier and runs Llama-3 fast, good for a
