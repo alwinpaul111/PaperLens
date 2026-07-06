@@ -1,12 +1,4 @@
-"""
-Vector store wrapper around FAISS (default) via LangChain's community
-integration. Persists to disk so uploaded papers survive a restart.
-Swap VECTOR_BACKEND="chroma" in config.py to use ChromaDB instead -
-both are wired up so you can discuss the tradeoffs in interviews:
-FAISS = fastest for pure similarity search, in-memory + file persistence.
-Chroma = built-in metadata filtering, easier incremental updates, its own
-on-disk DB engine.
-"""
+
 import os
 from typing import List
 
