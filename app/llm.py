@@ -1,12 +1,4 @@
-"""
-LLM wrapper. Two free-tier-friendly backends are supported:
 
-1. Groq (default) - free API key from console.groq.com, extremely fast
-   Llama-3 inference, no local GPU needed. Set GROQ_API_KEY.
-2. HuggingFace Inference API - uses your existing `alwinn` HF account.
-   Set HUGGINGFACEHUB_API_TOKEN.
-
-"""
 import os
 from app.config import LLM_PROVIDER, GROQ_MODEL, HF_LLM_MODEL, LLM_TEMPERATURE, LLM_MAX_TOKENS
 
