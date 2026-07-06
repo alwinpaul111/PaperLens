@@ -1,71 +1,78 @@
-# ResearchGPT — RAG-based Research Paper Assistant
+# PaperLens
 
-An end-to-end Retrieval-Augmented Generation (RAG) system that lets you upload
-research papers (PDF) and ask questions answered with grounded, cited excerpts.
+A Retrieval-Augmented Generation (RAG) system for asking questions about research papers, with grounded, page-level citations.
 
-## Architecture
+Upload a PDF, ask questions about it, and get answers pulled directly from the document rather than from a language model's general knowledge. Every answer links back to the specific page it came from.
+
+**Live demo:** https://researchgpt-nbdky2iczdnns8m34gb5cv.streamlit.app/
+**Repository:** https://github.com/alwinpaul111/PaperLens
+
+## What it does
+
+- Upload one or more PDF research papers through a web interface
+- The system extracts text, splits it into chunks, and builds a searchable vector index
+- Ask a question in plain language
+- The system retrieves the most relevant passages from the paper and passes them to a language model, which answers using only that retrieved content
+- Every answer comes with citations showing which document and page it was drawn from
+- Conversation memory lets you ask follow-up questions naturally
+
+## How it works
 
 ```
-PDF Upload → Text Extraction (PyMuPDF) → Chunking (LangChain splitter)
-→ Embeddings (Sentence-Transformers, all-MiniLM-L6-v2)
-→ Vector Store (FAISS, swappable for ChromaDB)
-→ Retrieval (top-k similarity search)
-→ LLM (Groq Llama-3, swappable for HF Inference API)
-→ Answer + Citations (doc name + page number)
-→ Conversation memory (sliding window)
+PDF upload
+  -> text extraction (PyMuPDF, page by page)
+  -> chunking (overlapping text segments, ~800 characters each)
+  -> embeddings (Sentence-Transformers, all-MiniLM-L6-v2)
+  -> vector index (FAISS, persisted to disk)
+  -> retrieval (top-k similarity search on the user's question)
+  -> LLM (Groq / Llama 3)
+  -> answer with citations
 ```
 
 ## Project structure
 
 ```
-research-gpt/
+PaperLens/
 ├── app/
-│   ├── config.py         # all tunables in one place
-│   ├── pdf_loader.py      # PDF -> per-page text
-│   ├── chunking.py        # text -> overlapping chunks
-│   ├── embeddings.py      # embedding model loader
-│   ├── vector_store.py    # FAISS / Chroma index build + search
-│   ├── llm.py              # Groq / HuggingFace LLM call
-│   ├── rag_pipeline.py    # retrieval + prompt + citations + memory
-│   ├── ingest.py           # ties PDF -> chunks -> index together
-│   └── main.py              # FastAPI app
-├── streamlit_app.py        # frontend (direct or API mode)
+│   ├── config.py          all tunable settings
+│   ├── pdf_loader.py       PDF -> per-page text
+│   ├── chunking.py         text -> overlapping chunks
+│   ├── embeddings.py       embedding model loader
+│   ├── vector_store.py     FAISS / Chroma index build and search
+│   ├── llm.py               Groq / HuggingFace LLM call
+│   ├── rag_pipeline.py     retrieval, prompting, citations, memory
+│   ├── ingest.py            ties PDF -> chunks -> index together
+│   └── main.py               FastAPI backend
+├── streamlit_app.py          frontend
 ├── notebooks/
-│   └── ResearchGPT_Colab.ipynb   # experiment in Colab
-├── Dockerfile               # FastAPI backend image
-├── Dockerfile.streamlit     # Streamlit frontend image
-├── docker-compose.yml        # run both together
+│   └── PaperLens_Colab.ipynb   experimentation notebook
+├── Dockerfile
+├── Dockerfile.streamlit
+├── docker-compose.yml
 └── requirements.txt
 ```
 
-## Setup
+## Running it locally
 
-### 1. Get a free LLM API key
-This project defaults to **Groq** (free tier, very fast Llama-3 inference):
-1. Go to https://console.groq.com/keys
-2. Create a free API key
-3. Set it as an environment variable:
-   ```bash
-   export GROQ_API_KEY="your-key-here"
-   ```
+### 1. Get a Groq API key
+Sign up at https://console.groq.com/keys and create a free API key.
 
-Alternative: use your existing HuggingFace account (`alwinn`) by setting
-`LLM_PROVIDER=huggingface` and `HUGGINGFACEHUB_API_TOKEN` instead — no extra
-signup needed.
+```bash
+export GROQ_API_KEY="your-key-here"
+```
 
 ### 2. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3a. Run locally (single process, easiest)
+### 3. Run
 ```bash
 streamlit run streamlit_app.py
 ```
-This runs in `RUN_MODE=direct` by default — no separate backend needed,
-same pattern as your hate speech detector deployment.
+Open the local URL Streamlit prints, upload a PDF, and start asking questions.
 
-### 3b. Run backend + frontend separately (production pattern)
+### Running the backend and frontend separately
 ```bash
 # Terminal 1
 uvicorn app.main:app --reload --port 8000
@@ -74,49 +81,42 @@ uvicorn app.main:app --reload --port 8000
 RUN_MODE=api API_URL=http://localhost:8000 streamlit run streamlit_app.py
 ```
 
-### 3c. Run with Docker Compose (full production setup)
+### Running with Docker
 ```bash
 export GROQ_API_KEY="your-key-here"
 docker-compose up --build
 ```
-- FastAPI docs: http://localhost:8000/docs
-- Streamlit UI: http://localhost:8501
+FastAPI docs at http://localhost:8000/docs, Streamlit UI at http://localhost:8501.
 
-## Deploying (matching your existing deployment style)
+## Design notes
 
-- **Streamlit Cloud**: deploy `streamlit_app.py` directly with `RUN_MODE=direct`.
-  Add `GROQ_API_KEY` as a secret in Streamlit Cloud's settings. This mirrors
-  your `HATE-SPEECH-DETECTOR` deployment exactly.
-- **FastAPI backend**: deploy separately on Render / Railway / Fly.io (all have
-  free tiers) if you want the API + Streamlit split, useful for demonstrating
-  a proper client-server architecture in interviews.
+**Chunking.** Text is split into 800-character segments with 150 characters of overlap, using LangChain's recursive character splitter. This balances retrieval precision against losing context at chunk boundaries.
 
-## Key design decisions (good for interview talking points)
+**Embeddings.** `all-MiniLM-L6-v2` was chosen for being small, fast, and CPU-friendly, avoiding any embedding API cost while still giving solid semantic search quality.
 
-- **Chunking strategy**: `RecursiveCharacterTextSplitter` with 800-char chunks
-  and 150-char overlap — balances retrieval precision vs. context loss at
-  chunk boundaries.
-- **Embedding model**: `all-MiniLM-L6-v2` — 384-dim, CPU-friendly, strong
-  performance/speed tradeoff for semantic search (no GPU/API cost).
-- **Vector store choice**: FAISS by default for raw speed; ChromaDB wired in
-  as an alternative to discuss metadata filtering and persistence tradeoffs.
-- **Citations**: every chunk carries `(doc_name, page_number)` metadata all
-  the way through retrieval so answers can point back to an exact page —
-  this is what makes it a *research assistant* rather than a black box.
-- **Conversation memory**: a sliding window of the last N turns is injected
-  into the prompt so follow-up questions ("what about their dataset size?")
-  resolve correctly without re-uploading context.
-- **LLM swap**: the `llm.py` abstraction lets you swap Groq ↔ HuggingFace ↔
-  OpenAI with a one-line config change — demonstrates you understand LLM
-  provider abstraction, not just one API.
+**Vector store.** FAISS is used by default for speed and simplicity. ChromaDB is also wired in as a swappable alternative (`VECTOR_BACKEND` in `config.py`) since it offers built-in metadata filtering and easier incremental updates.
 
-## Extending this project (nice additions for your CV)
+**Citations.** Every chunk carries its source document name and page number as metadata, all the way through retrieval, so an answer can always be traced back to an exact page.
 
-- Add re-ranking (e.g. Cohere rerank or a cross-encoder) after initial
-  retrieval to improve precision.
-- Add hybrid search (BM25 + dense) for better recall on exact terms/numbers.
-- Add evaluation with RAGAS (faithfulness, answer relevance, context
-  precision) — strong signal for a Data Science master's application.
-- Add multi-document comparison ("compare the methodology in paper A vs B").
-- Swap FAISS for a hosted vector DB (Pinecone/Weaviate free tier) to show
-  cloud-native vector search experience.
+**Broad questions.** Generic questions like "what is this paper about" retrieve poorly with pure similarity search, since no single chunk closely matches such a general query. For these, the system also pulls in the paper's first page directly and runs a secondary search for introduction/overview content, rather than relying only on the literal wording of the question.
+
+**LLM provider.** Groq is used by default for its free tier and fast inference. The LLM call is abstracted in `llm.py` so a different provider can be swapped in with a one-line config change.
+
+## Known limitations
+
+- PDF text extraction can struggle with heavily math- or symbol-dense sections, occasionally producing garbled context for questions that land on those parts of a paper.
+- Very open-ended questions are inherently harder for retrieval-based systems than specific ones; asking "what dataset did the authors use" will generally outperform "what is this paper about."
+- The Groq free tier has a request size and rate limit, so very broad queries that pull in a lot of context can occasionally hit a rate-limit error.
+- The vector index does not currently persist across a Streamlit Cloud app restart; re-upload the PDF if the app has gone to sleep and restarted.
+
+## Possible extensions
+
+- Re-ranking retrieved chunks with a cross-encoder to improve precision
+- Hybrid search combining BM25 with dense retrieval for better recall on exact terms and numbers
+- Automated evaluation with RAGAS (faithfulness, answer relevance, context precision)
+- Multi-document comparison across papers
+- A hosted vector database (Pinecone, Weaviate) in place of local FAISS
+
+## Author
+
+Alwin Paul
