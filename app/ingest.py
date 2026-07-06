@@ -1,8 +1,4 @@
-"""
-Ingestion pipeline: PDF file(s) on disk -> extracted pages -> chunks ->
-embedded + added to the vector store. This is the function both the
-FastAPI upload endpoint and the Colab notebook call.
-"""
+
 from typing import List
 
 from app.pdf_loader import extract_pages_from_multiple
