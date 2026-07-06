@@ -1,8 +1,4 @@
-"""
-Chunking: splits page-level text into overlapping chunks small enough
-to embed meaningfully, while keeping track of which document + page
-each chunk came from (needed for citations).
-"""
+
 from dataclasses import dataclass, field
 from typing import List
 import uuid
