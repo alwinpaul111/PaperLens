@@ -1,5 +1,5 @@
 """
-ResearchGPT - Streamlit frontend.
+PaperLens - Streamlit frontend.
 
 Two modes, controlled by RUN_MODE env var:
   - "api"    (default): talks to the FastAPI backend over HTTP (use this
@@ -21,7 +21,7 @@ sys.path.append(str(Path(__file__).resolve().parent))
 RUN_MODE = os.getenv("RUN_MODE", "direct")
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
-st.set_page_config(page_title="ResearchGPT", page_icon="📚", layout="wide")
+st.set_page_config(page_title="PaperLens", layout="wide")
 
 if "session_id" not in st.session_state:
     st.session_state.session_id = "streamlit-session"
@@ -82,7 +82,7 @@ def do_ask(question: str):
 
 # ---------- Sidebar: upload ----------
 with st.sidebar:
-    st.title("📚 ResearchGPT")
+    st.title("PaperLens")
     st.caption("Chat with your research papers, grounded with citations.")
     st.divider()
 
@@ -100,7 +100,7 @@ with st.sidebar:
                 st.error(f"Failed to process PDFs: {e}")
 
     st.divider()
-    if st.button("🗑️ Clear conversation", use_container_width=True):
+    if st.button("Clear conversation", use_container_width=True):
         st.session_state.chat_history = []
         if RUN_MODE == "direct":
             st.session_state.memory.clear()
@@ -118,7 +118,7 @@ with st.sidebar:
 st.header("Ask a question about your papers")
 
 if not index_ready():
-    st.info("👈 Upload at least one PDF to get started.")
+    st.info("Upload at least one PDF to get started.")
 
 for question, answer, citations in st.session_state.chat_history:
     with st.chat_message("user"):
@@ -126,7 +126,7 @@ for question, answer, citations in st.session_state.chat_history:
     with st.chat_message("assistant"):
         st.write(answer)
         if citations:
-            with st.expander(f"📎 {len(citations)} source(s)"):
+            with st.expander(f"{len(citations)} source(s)"):
                 for c in citations:
                     st.markdown(
                         f"**{c['doc_name']}** — page {c['page_number']} "
@@ -146,7 +146,7 @@ if question:
                 answer, citations = f"Error: {e}", []
         st.write(answer)
         if citations:
-            with st.expander(f"📎 {len(citations)} source(s)"):
+            with st.expander(f"{len(citations)} source(s)"):
                 for c in citations:
                     st.markdown(
                         f"**{c['doc_name']}** — page {c['page_number']} "
