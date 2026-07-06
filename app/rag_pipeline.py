@@ -53,7 +53,7 @@ class ConversationMemory:
         self.turns = []
 
 
-PROMPT_TEMPLATE = """You are ResearchGPT, an assistant that answers questions strictly using \
+PROMPT_TEMPLATE = """You are PaperLens, an assistant that answers questions strictly using \
 the provided research paper excerpts. Follow these rules:
 - Only use information found in the CONTEXT below. If the answer isn't in the context, say so honestly.
 - When you state a fact, refer to it naturally (e.g. "According to the paper...").
