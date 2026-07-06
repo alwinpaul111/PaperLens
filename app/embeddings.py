@@ -1,7 +1,4 @@
-"""
-Embedding model wrapper. Uses a local Sentence-Transformers model so the
-project runs with zero API cost for the embedding step.
-"""
+
 from functools import lru_cache
 from langchain_huggingface import HuggingFaceEmbeddings
 
