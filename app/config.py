@@ -1,4 +1,8 @@
-
+"""
+Central configuration for PaperLens.
+All tunable parameters live here so you can adjust the pipeline
+without touching the core logic.
+"""
 import os
 from pathlib import Path
 
@@ -31,7 +35,7 @@ TOP_K = 6  # number of chunks retrieved per query
 # Alternative: swap in HuggingFace Inference API (see llm.py) using your
 # alwinn HF account + HUGGINGFACEHUB_API_TOKEN.
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")  # "groq" or "huggingface"
-GROQ_MODEL = "llama-3.1-8b-instant"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 HF_LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 LLM_TEMPERATURE = 0.2
 LLM_MAX_TOKENS = 800
