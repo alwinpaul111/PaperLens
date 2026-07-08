@@ -101,6 +101,17 @@ def get_first_page_chunks():
     return results
 
 
+def clear_index():
+    """Delete the persistent index on disk. Call this before re-ingesting,
+    so 'Process PDFs' reflects exactly the files currently listed in the
+    uploader, instead of silently accumulating every PDF ever uploaded."""
+    import shutil
+    if os.path.exists(FAISS_INDEX_PATH):
+        shutil.rmtree(FAISS_INDEX_PATH)
+    if os.path.exists(CHROMA_PERSIST_DIR):
+        shutil.rmtree(CHROMA_PERSIST_DIR)
+
+
 def index_exists() -> bool:
     if VECTOR_BACKEND == "chroma":
         return os.path.exists(CHROMA_PERSIST_DIR) and bool(os.listdir(CHROMA_PERSIST_DIR))
