@@ -139,17 +139,24 @@ def _is_broad_summary_question(question: str) -> bool:
 
 
 def answer_question(question: str, memory: ConversationMemory = None, k: int = TOP_K) -> RAGResponse:
-    results = similarity_search(question, k=k)
+    initial_results = similarity_search(question, k=k)
 
     # Broad "what is this about" questions retrieve poorly with pure
     # similarity search (no chunk closely matches such a generic query).
     # For these, always pull in the earliest-page chunks too, since
-    # introductions/abstracts are what actually answer this kind of question.
+    # introductions/abstracts/bylines are what actually answer this kind
+    # of question.
     if _is_broad_summary_question(question):
-        seen_ids = {doc.metadata.get("chunk_id") for doc, _ in results}
+        # Build the merged pool in PRIORITY order: page-1 chunks first
+        # (guarantees title/author info survives the per-doc cap below),
+        # then intro-search results, then the original similarity search
+        # last. If page-1 chunks went last, a question like "who are the
+        # authors" - which also matches a paper's own reference list well -
+        # could fill the per-doc cap with citation text before the real
+        # byline chunk ever got a chance to be included.
+        seen_ids = set()
+        results = []
 
-        # Page 1 almost always has the title, authors, and abstract/intro —
-        # pull it in directly rather than hoping similarity search finds it.
         for doc, score in get_first_page_chunks():
             if doc.metadata.get("chunk_id") not in seen_ids:
                 results.append((doc, score))
@@ -161,8 +168,15 @@ def answer_question(question: str, memory: ConversationMemory = None, k: int = T
                 results.append((doc, score))
                 seen_ids.add(doc.metadata.get("chunk_id"))
 
-        # Cap chunks per document first, so with multiple documents no single
+        for doc, score in initial_results:
+            if doc.metadata.get("chunk_id") not in seen_ids:
+                results.append((doc, score))
+                seen_ids.add(doc.metadata.get("chunk_id"))
+
+        # Cap chunks per document, so with multiple documents no single
         # one dominates the context and every document stays represented.
+        # Because results are now in priority order, page-1 content always
+        # claims its slot before lower-priority chunks compete for the cap.
         per_doc_counts = {}
         capped_results = []
         for doc, score in results:
@@ -178,6 +192,8 @@ def answer_question(question: str, memory: ConversationMemory = None, k: int = T
         # provider's tokens-per-minute rate limit on a single request, and
         # overwhelm a small model's ability to synthesize coherently.
         results = results[:MAX_BROAD_QUESTION_CHUNKS]
+    else:
+        results = initial_results
 
     if not results:
         return RAGResponse(
