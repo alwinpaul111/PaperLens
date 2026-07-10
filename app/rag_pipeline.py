@@ -96,6 +96,34 @@ def _strip_invented_followup(text: str) -> str:
     return text
 
 
+def _strip_repetition_loop(text: str, max_repeats: int = 1) -> str:
+    """Defensive cleanup: models can get stuck restating a near-identical
+    sentence over and over (a known degenerate-generation failure mode,
+    especially with noisy/garbled context from math-heavy PDF extraction).
+    Truncate the answer at the point a sentence starts repeating."""
+    import re
+    # Split on sentence-ending punctuation while keeping it simple - this
+    # doesn't need to be perfect, just needs to catch obvious loops.
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    seen = {}
+    output = []
+    for sentence in sentences:
+        # Normalize: ignore case, digits, and whitespace differences so
+        # "(15) The reparameterization trick..." vs "(16) The
+        # reparameterization trick..." are still recognized as the same
+        # repeated content.
+        normalized = re.sub(r'\d+', '', sentence.lower())
+        normalized = re.sub(r'\s+', ' ', normalized).strip()
+        if not normalized:
+            output.append(sentence)
+            continue
+        seen[normalized] = seen.get(normalized, 0) + 1
+        if seen[normalized] > max_repeats:
+            break
+        output.append(sentence)
+    return ' '.join(output).strip()
+
+
 def _build_context(results, max_chars_per_chunk: int = 900) -> str:
     # Group chunks by document name so the LLM sees "N excerpts from document X",
     # not a flat numbered list that can be misread as N separate documents.
@@ -218,6 +246,7 @@ def answer_question(question: str, memory: ConversationMemory = None, k: int = T
 
     answer_text = generate_answer(prompt)
     answer_text = _strip_invented_followup(answer_text)
+    answer_text = _strip_repetition_loop(answer_text)
 
     citations = [
         Citation(
