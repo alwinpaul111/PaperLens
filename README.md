@@ -9,7 +9,7 @@ Upload a PDF, ask questions about it, and get answers pulled directly from the d
 
 ## What it does
 
-- Upload one or more PDF research papers through a web interface
+- Upload one or more PDF of the research papers through a web interface
 - The system extracts text, splits it into chunks, and builds a searchable vector index
 - Ask a question in plain language
 - The system retrieves the most relevant passages from the paper and passes them to a language model, which answers using only that retrieved content
