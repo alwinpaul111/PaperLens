@@ -62,6 +62,7 @@ the provided research paper excerpts. Follow these rules:
   If multiple documents appear, treat each one separately and address them individually rather than
   blending their content together. Do not confuse a document's reference list (its bibliography,
   citing other authors' work) with the content of the document itself.
+- {doc_requirement}
 - If the question refers to "paper1", "paper2", "the first paper", "the second paper", or similar,
   this means the first and second documents listed in the CONTEXT by upload order, not a literal
   search for text matching "paper1". Map these references to the actual document names shown.
@@ -125,7 +126,7 @@ def _strip_repetition_loop(text: str, max_repeats: int = 1) -> str:
     return ' '.join(output).strip()
 
 
-def _build_context(results, max_chars_per_chunk: int = 900) -> str:
+def _build_context(results, max_chars_per_chunk: int = 900):
     # Group chunks by document name so the LLM sees "N excerpts from document X",
     # not a flat numbered list that can be misread as N separate documents.
     by_doc = {}
@@ -144,7 +145,7 @@ def _build_context(results, max_chars_per_chunk: int = 900) -> str:
                 text = text[:max_chars_per_chunk] + "..."
             blocks.append(f"[Page {doc.metadata['page_number']}]\n{text}")
 
-    return "\n\n".join(blocks)
+    return "\n\n".join(blocks), doc_names
 
 
 SUMMARY_TRIGGERS = (
@@ -250,9 +251,23 @@ def answer_question(question: str, memory: ConversationMemory = None, k: int = T
             citations=[],
         )
 
-    context = _build_context(results)
+    context, doc_names = _build_context(results)
     history = memory.as_context() if memory else ""
-    prompt = PROMPT_TEMPLATE.format(history=history, context=context, question=question)
+
+    if len(doc_names) > 1:
+        numbered = "; ".join(f"{i+1}) {name}" for i, name in enumerate(doc_names))
+        doc_requirement = (
+            f"There are exactly {len(doc_names)} documents in the context: {numbered}. "
+            f"If the question asks about multiple or all papers, your answer MUST address "
+            f"every single one of these {len(doc_names)} documents by name — do not stop "
+            f"after only some of them, and do not skip any."
+        )
+    else:
+        doc_requirement = "There is one document in the context."
+
+    prompt = PROMPT_TEMPLATE.format(
+        history=history, context=context, question=question, doc_requirement=doc_requirement
+    )
 
     answer_text = generate_answer(prompt)
     answer_text = _strip_invented_followup(answer_text)
