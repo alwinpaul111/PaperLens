@@ -14,7 +14,7 @@ Upload a PDF, ask questions about it, and get answers pulled directly from the d
 - Ask a question in plain language
 - The system retrieves the most relevant passages from the paper and passes them to a language model, which answers using only that retrieved content
 - Every answer comes with citations showing which document and page it was drawn from
-- Conversation memory lets you ask follow-up questions naturally
+- Conversation memory lets you ask follow-up questions naturally.
 
 ## How it works
 
