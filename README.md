@@ -7,7 +7,7 @@ Upload a PDF, ask questions about it, and get answers pulled directly from the d
 **Live demo:-** https://paperlens-nbdky2iczdnns8m34gb5cv.streamlit.app/
 
 
-## What it does
+## What it does:
 
 - Upload one or more PDF of the research papers through a web interface
 - The system extracts text, splits it into chunks, and builds a searchable vector index
