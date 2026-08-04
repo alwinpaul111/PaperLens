@@ -1,13 +1,6 @@
 """
 PaperLens - Streamlit frontend.
 
-Two modes, controlled by RUN_MODE env var:
-  - "api"    (default): talks to the FastAPI backend over HTTP (use this
-              when you deploy FastAPI + Streamlit as separate services,
-              e.g. FastAPI on Render + Streamlit on Streamlit Cloud)
-  - "direct": imports the RAG pipeline directly in-process (simplest for
-              a single-container Streamlit Cloud deployment, same pattern
-              you used for the hate speech detector)
 """
 import os
 import sys
