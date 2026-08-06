@@ -119,4 +119,4 @@ FastAPI docs at http://localhost:8000/docs, Streamlit UI at http://localhost:850
 
 ## Author
 
-Alwin Paul
+ALWIN PAUL
