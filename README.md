@@ -16,7 +16,7 @@ Upload a PDF, ask questions about it, and get answers pulled directly from the d
 - Every answer comes with citations showing which document and page it was drawn from
 - Conversation memory lets you ask follow-up questions naturally
 
-## How it works:-
+## How it works :
 
 ```
 PDF upload
@@ -29,7 +29,7 @@ PDF upload
   -> answer with citations
 ```
 
-## Project structure
+## Project structure :
 
 ```
 PaperLens/
