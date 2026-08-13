@@ -55,7 +55,7 @@ PaperLens/
 ## Running it locally
 
 ### 1. Get a Groq API key
-Sign up at https://console.groq.com/keys and create a free API key.
+Sign up at https://console.groq.com/keys and create a free API key
 
 ```bash
 export GROQ_API_KEY="your-key-here"
