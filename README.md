@@ -2,7 +2,7 @@
 
 A Retrieval-Augmented Generation (RAG) system for asking questions about research papers, with grounded, page level citations.
 
-Upload a PDF, ask questions about it, and get answers pulled directly from the document rather than from a language model's general knowledge. Every answer links back to the specific page it came from.
+Upload a PDF, ask questions about it, and get answers pulled directly from the document rather than from a language model's general knowledge. Every answer links back to the specific page it came from
 
 **Live demo:-** https://paperlens-nbdky2iczdnns8m34gb5cv.streamlit.app/
 
