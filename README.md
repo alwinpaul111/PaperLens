@@ -111,7 +111,7 @@ FastAPI docs at http://localhost:8000/docs, Streamlit UI at http://localhost:850
 
 ## Possible extensions
 
-- Re-ranking retrieved chunks with a cross-encoder to improve precision.
+- Re-ranking retrieved chunks with a cross-encoder to improve precision
 - Hybrid search combining BM25 with dense retrieval for better recall on exact terms and numbers
 - Automated evaluation with RAGAS (faithfulness, answer relevance, context precision)
 - Multi-document comparison across papers
