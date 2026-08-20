@@ -30,12 +30,13 @@ CHROMA_PERSIST_DIR = str(VECTORSTORE_DIR / "chroma_db")
 TOP_K = 6  # number of chunks retrieved per query
 
 # ---------- LLM ----------
-# Groq gives a generous free tier and runs Llama-3 fast, good for a
+# Groq gives a generous free tier and runs open models fast, good for a
 # no-cost student deployment. Set GROQ_API_KEY as an environment variable.
-# Alternative: swap in HuggingFace Inference API (see llm.py) using your
-# alwinn HF account + HUGGINGFACEHUB_API_TOKEN.
+# NOTE: Groq deprecated llama-3.1-8b-instant and llama-3.3-70b-versatile
+# on 2026-06-17. Using their recommended replacement, openai/gpt-oss-120b,
+# for the main model (strong multi-document reasoning, still free-tier).
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")  # "groq" or "huggingface"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL = "openai/gpt-oss-120b"
 HF_LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 LLM_TEMPERATURE = 0.2
 LLM_MAX_TOKENS = 1100
