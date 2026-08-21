@@ -101,7 +101,7 @@ Partially. Text extraction, chunking, and embeddings all run locally with no int
 
 **Vector store.** FAISS is used by default for speed and simplicity. ChromaDB is also wired in as a swappable alternative (`VECTOR_BACKEND` in `config.py`) since it offers built-in metadata filtering and easier incremental updates. Re-processing PDFs clears and rebuilds the index from scratch, so the app always reflects exactly what's currently uploaded rather than accumulating every document ever indexed.
 
-**Citations.** Every chunk carries its source document name and page number as metadata, all the way through retrieval, so an answer can always be traced back to an exact page.
+**Citations.** Every chunk carries its source document name and page number as metadata, all the way through retrieval, so an answer can always be traced back to an exact page
 
 **Broad and multi-document questions.** Generic questions like "what is this paper about" retrieve poorly with pure similarity search, since no single chunk closely matches such a general query. For these, the system directly pulls each paper's first page (title, abstract) rather than relying purely on embedding similarity, and explicitly lists every uploaded document by name in the prompt so the model can't silently skip one when asked to summarize or compare multiple papers.
 
