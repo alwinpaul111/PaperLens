@@ -103,7 +103,7 @@ Partially. Text extraction, chunking, and embeddings all run locally with no int
 
 **Citations.** Every chunk carries its source document name and page number as metadata, all the way through retrieval, so an answer can always be traced back to an exact page
 
-**Broad and multi-document questions.** Generic questions like "what is this paper about" retrieve poorly with pure similarity search, since no single chunk closely matches such a general query. For these, the system directly pulls each paper's first page (title, abstract) rather than relying purely on embedding similarity, and explicitly lists every uploaded document by name in the prompt so the model can't silently skip one when asked to summarize or compare multiple papers.
+**Broad and multi-document questions.** Generic questions like "what is this paper about" retrieve poorly with pure similarity search, since no single chunk closely matches such a general query. For these, the system directly pulls each paper's first page (title, abstract) rather than relying purely on embedding similarity, and explicitly lists every uploaded document by name in the prompt so the model can't silently skip one when asked to summarize or compare multiple papers
 
 **Generation safeguards.** The LLM occasionally produced degenerate output on noisy context — looping on a near-identical sentence, or inventing a follow-up question that was never asked. Both are mitigated with a generation-time frequency penalty plus a post-processing pass that detects and truncates repeated sentences or invented follow-ups, since prompt instructions alone weren't fully reliable.
 
