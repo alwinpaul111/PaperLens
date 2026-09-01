@@ -115,7 +115,7 @@ Partially. Text extraction, chunking, and embeddings all run locally with no int
 - Very open-ended questions are inherently harder for retrieval-based systems than specific ones; asking "what dataset did the authors use" will generally outperform "what is this paper about."
 - The Groq free tier has request size and rate limits, so very broad queries that pull in a lot of context can occasionally hit a rate-limit error.
 - Uploading a new PDF replaces the previously indexed documents rather than adding to them — a deliberate tradeoff to avoid stale or contaminated results, at the cost of not supporting an incremental document library.
-- The vector index does not persist across a Streamlit Cloud app restart after extended inactivity; re-upload the PDF(s) if the app has gone to sleep and restarted.
+- The vector index does not persist across a Streamlit Cloud app restart after extended inactivity; re-upload the PDF(s) if the app has gone to sleep and restarted
 
 ## Possible extensions
 
