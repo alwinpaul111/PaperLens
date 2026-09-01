@@ -123,7 +123,7 @@ Partially. Text extraction, chunking, and embeddings all run locally with no int
 - Hybrid search combining BM25 with dense retrieval for better recall on exact terms and numbers
 - Automated evaluation with RAGAS (faithfulness, answer relevance, context precision)
 - Layout- or OCR-aware PDF extraction to handle math-heavy documents cleanly
-- A hosted vector database (Pinecone, Weaviate) in place of local FAISS
+- A hosted vector database (Pinecone, Weaviate) in place of local FAISS.
 
 ## Author
 
