@@ -91,7 +91,7 @@ FastAPI docs at http://localhost:8000/docs, Streamlit UI at http://localhost:850
 
 ## Does it run offline?
 
-Partially. Text extraction, chunking, and embeddings all run locally with no internet connection required once the embedding model is downloaded. The LLM call does not — it sends a request to Groq's API for every answer. A fully offline version is possible by swapping in a locally-hosted model (e.g. via Ollama), but that trades off answer quality and speed for offline capability, which wasn't the goal here.
+Partially Yes, Text extraction, chunking, and embeddings all run locally with no internet connection required once the embedding model is downloaded. The LLM call does not — it sends a request to Groq's API for every answer. A fully offline version is possible by swapping in a locally-hosted model (e.g. via Ollama), but that trades off answer quality and speed for offline capability, which wasn't the goal here.
 
 ## Design notes
 
