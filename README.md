@@ -15,7 +15,7 @@ Upload a PDF, ask questions about it, and get answers pulled directly from the d
 - The system retrieves the most relevant passages from the paper and passes them to a language model, which answers using only that retrieved content
 - Every answer comes with citations showing which document and page it was drawn from
 - Conversation memory lets you ask follow-up questions naturally
-- Works with multiple documents at once, correctly distinguishing between them rather than blending their content.
+- Works with multiple documents at once, correctly distinguishing between them rather than blending their content
 
 ## How it works
 
